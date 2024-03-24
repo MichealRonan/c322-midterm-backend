@@ -39,5 +39,6 @@ jobs:
           password: ${{ secrets.ACCESS_TOKEN }}
 
         run: |
+          docker login ghcr.io
           docker build -t ghcr.io/michealronan/midterm:latest --file DockerFile .  
           docker push ghcr.io/michealronan/midterm:latest
