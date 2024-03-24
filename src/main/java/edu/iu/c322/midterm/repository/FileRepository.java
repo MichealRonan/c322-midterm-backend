@@ -15,6 +15,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class FileRepository {
@@ -64,7 +65,7 @@ public class FileRepository {
         if (Files.exists(path)) {
             List<String> data = Files.readAllLines(path);
             for (String line : data) {
-                if(line.trim().length() != 0) {
+                if(!line.trim().isEmpty()) {
                     Question q = Question.fromLine(line);
                     result.add(q);
                 }
@@ -104,7 +105,7 @@ public class FileRepository {
     public Question get(Integer id) throws IOException {
         List<Question> questions = findAllQuestions();
         for (Question question : questions) {
-            if (question.getId() == id) {
+            if (Objects.equals(question.getId(), id)) {
                 return question;
             }
         }
@@ -127,9 +128,58 @@ public class FileRepository {
         String fileExtension = ".png";
         Path path = Paths.get(IMAGES_FOLDER_PATH
                 + "/" + id + fileExtension);
-        byte[] image = Files.readAllBytes(path);
-        return image;
+        return Files.readAllBytes(path);
     }
 
+    public int addQuiz(Quiz quiz) throws IOException {
+        Path path = Paths.get(QUIZ_DATABASE_NAME);
+        List<Quiz> quizzes = findAllQuizzes();
+        int id = quizzes.stream().mapToInt(Quiz::getId).max().orElse(0) + 1;
+        quiz.setId(id);
+        String data = quiz.toLine(id);
+        appendToFile(path, data + NEW_LINE);
+        return id;
+    }
 
+    public List<Quiz> findAllQuizzes() throws IOException {
+        List<Quiz> result = new ArrayList<>();
+        Path path = Paths.get(QUIZ_DATABASE_NAME);
+        if (Files.exists(path)) {
+            List<String> data = Files.readAllLines(path);
+            for (String line : data) {
+                if(!line.trim().isEmpty()) {
+                    Quiz q = Quiz.fromLine(line);
+                    q.setQuestions(find(q.getQuestionIds()));
+                    result.add(q);
+                }
+            }
+        }
+        return result;
+    }
+
+    public boolean updateQuiz(Quiz updatedQuiz) throws IOException {
+        List<Quiz> quizzes = findAllQuizzes();
+        boolean found = false;
+        for (int i = 0; i < quizzes.size(); i++) {
+            if (quizzes.get(i).getId().equals(updatedQuiz.getId())) {
+                quizzes.set(i, updatedQuiz);
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            rewriteQuizFile(quizzes);
+        }
+
+        return found;
+    }
+
+    private void rewriteQuizFile(List<Quiz> quizzes) throws IOException {
+        Path path = Paths.get(QUIZ_DATABASE_NAME);
+        Files.write(path, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
+        for (Quiz quiz : quizzes) {
+            appendToFile(path, quiz.toLine(quiz.getId()) + NEW_LINE);
+        }
+    }
 }
