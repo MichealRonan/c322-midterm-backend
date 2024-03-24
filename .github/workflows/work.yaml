@@ -31,10 +31,13 @@ jobs:
           reporter: java-junit
           fail-on-error: true
 
-      - name: Build and push the image
-
+      - name: Login to GHCR
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: MichealRonan
+          password: ${{ secrets.ACCESS_TOKEN }}
 
         run: |
-          docker login --username MichealRonan --password GithubLegend24 ghcr.io
           docker build -t ghcr.io/michealronan/midterm:latest --file DockerFile .  
           docker push ghcr.io/michealronan/midterm:latest
