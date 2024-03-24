@@ -34,6 +34,6 @@ jobs:
       - name: Build and push the image
 
         run: |
-          docker login ghcr.io -u MichealRonan -p ${{secrets.ACCESS_TOKEN}}
+          docker login ghcr.io --username MichealRonan --password ${{secrets.ACCESS_TOKEN}}
           docker build -t ghcr.io/michealronan/midterm:latest --file DockerFile .  
           docker push ghcr.io/michealronan/midterm:latest
