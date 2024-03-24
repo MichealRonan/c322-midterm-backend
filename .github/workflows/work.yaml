@@ -35,6 +35,6 @@ jobs:
 
 
         run: |
-          docker login --username MichealRonan --password GithubLegend24 ghcr.io
+          docker login --username ${{ github.repository_owner }} --password GithubLegend24 ghcr.io
           docker build -t ghcr.io/michealronan/midterm:latest --file DockerFile .  
           docker push ghcr.io/michealronan/midterm:latest
